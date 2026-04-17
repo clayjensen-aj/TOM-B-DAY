@@ -292,18 +292,7 @@
       totalSavingsEl.textContent = `Total Savings: ${totalSavings}`;
     }
 
-    // Generate or update the Perfect Numbers based on progress
-    function updatePerfectNumbers() {
-      const base = 6000;
-      const change = Math.floor(highestPercent * 10);
-
-      const num1 = 6000 + (change * 1) % 1000;
-      const num2 = 6100 + (change * 2) % 900;
-      const num3 = 6200 + (change * 3) % 800;
-      const num4 = 6300 + (change * 4) % 700;
-
-      perfectNumbersEl.textContent = `${num1} ${num2} ${num3} ${num4}`;
-    }
+   
 
     // Handle adding new saving amount (increment/add)
     function addSavings(amount) {
