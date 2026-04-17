@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Savings Progress App</title>
+<title>Savings Progress App with Persistence</title>
 <style>
   /* Dark theme base */
   body {
@@ -227,10 +227,9 @@
   (function() {
     const goalMax = 2000;
     const goalMin = 0; // design shows 0 - 2000 range
-    // Initialize saved total
-    let totalSavings = 0;
 
-    // Highest progress percent reached (sticky progress)
+    // Retrieve saved from localStorage or default 0
+    let totalSavings = 0;
     let highestPercent = 0;
 
     // Elements references
@@ -242,6 +241,25 @@
     const perfectNumbersEl = document.getElementById('perfect-numbers');
     const buttonsContainer = document.getElementById('buttons-container');
     const inputSavings = document.getElementById('input-savings');
+    const progressBarBg = document.getElementById('progress-bar-bg');
+
+    // Storage keys
+    const STORAGE_TOTAL_KEY = 'savings-total';
+    const STORAGE_HIGHEST_PERCENT_KEY = 'savings-highest-percent';
+
+    // Load saved data
+    function loadFromStorage() {
+      const savedTotal = localStorage.getItem(STORAGE_TOTAL_KEY);
+      const savedPercent = localStorage.getItem(STORAGE_HIGHEST_PERCENT_KEY);
+      totalSavings = savedTotal !== null ? Math.min(goalMax, Number(savedTotal)) : 0;
+      highestPercent = savedPercent !== null ? Number(savedPercent) : 0;
+    }
+
+    // Save data to localStorage
+    function saveToStorage() {
+      localStorage.setItem(STORAGE_TOTAL_KEY, totalSavings);
+      localStorage.setItem(STORAGE_HIGHEST_PERCENT_KEY, highestPercent);
+    }
 
     // Display the countdown days till Sep 3, 2026
     function updateCountdown() {
@@ -252,7 +270,7 @@
       countdownEl.textContent = `Days remaining till 3 Sep: ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
     }
 
-    // Update the goal text "0 - 2000"
+    // Update the goal text "X - 2000"
     function updateGoalText() {
       goalValueEl.textContent = `${totalSavings} - ${goalMax}`;
     }
@@ -260,14 +278,12 @@
     // Update progress bar and percentage with sticky progress logic
     function updateProgress() {
       const percent = Math.min(100, Math.floor((totalSavings / goalMax) * 100));
-      // Only update if this progress is greater than previous highest
       if (percent > highestPercent) {
         highestPercent = percent;
       }
       progressBar.style.width = highestPercent + '%';
       progressPercentEl.textContent = highestPercent + '%';
       // Update ARIA progressbar value
-      const progressBarBg = document.getElementById('progress-bar-bg');
       progressBarBg.setAttribute('aria-valuenow', highestPercent);
     }
 
@@ -277,54 +293,49 @@
     }
 
     // Generate or update the Perfect Numbers based on progress
-    // Let's make them change as the percentage moves: a limited example (cycling numbers)
-    // We'll produce 4 numbers that change dynamically based on highestPercent
     function updatePerfectNumbers() {
-      // Example logic: create 4 numbers changing with progress.
-      // For "reacting" effect, use mod and some transformations.
-      // Numbers will be between 6000 to 7000 approx (like original 6877)
       const base = 6000;
       const change = Math.floor(highestPercent * 10);
 
-      // We'll create 4 numbers varying differently
       const num1 = 6000 + (change * 1) % 1000;
       const num2 = 6100 + (change * 2) % 900;
       const num3 = 6200 + (change * 3) % 800;
       const num4 = 6300 + (change * 4) % 700;
 
-      const perfectStr = `${num1} ${num2} ${num3} ${num4}`;
-      perfectNumbersEl.textContent = perfectStr;
+      perfectNumbersEl.textContent = `${num1} ${num2} ${num3} ${num4}`;
     }
 
-    // Handle adding a new saving amount
+    // Handle adding new saving amount (increment/add)
     function addSavings(amount) {
       if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) return;
-      // Add to total savings
       totalSavings += amount;
       if (totalSavings > goalMax) totalSavings = goalMax;
-
-      // Update all relevant UI parts
       updateGoalText();
       updateProgress();
       updateTotalSavings();
       updatePerfectNumbers();
-      // Clear the input field after entering new total
+      saveToStorage();
       inputSavings.value = '';
     }
 
-    // Handle manual input on Enter key or on losing focus
+    // Handle manual input submission on Enter or blur
     function handleInputSubmit() {
       const val = Number(inputSavings.value);
       if (!isNaN(val) && val > 0) {
-        addSavings(val);
+        totalSavings += val;
+        if (totalSavings > goalMax) totalSavings = goalMax;
+        updateGoalText();
+        updateProgress();
+        updateTotalSavings();
+        updatePerfectNumbers();
+        saveToStorage();
+        inputSavings.value = '';
       }
     }
 
-    // Sticky progress logic: When typing in empty or smaller value,
-    // progress remains at highestPercent until new total is submitted.
-
-    // Initialize UI at first run
+    // Initialize UI with loaded or default values
     function init() {
+      loadFromStorage();
       updateCountdown();
       updateGoalText();
       updateProgress();
@@ -332,11 +343,10 @@
       updatePerfectNumbers();
     }
 
-    // Timer to update countdown daily (refresh every minute for demo)
     setInterval(updateCountdown, 60000);
     updateCountdown();
 
-    // Event listeners
+    // Buttons handlers
     buttonsContainer.addEventListener('click', (e) => {
       if (e.target.classList.contains('btn-increment')) {
         const val = Number(e.target.getAttribute('data-val'));
@@ -344,22 +354,18 @@
       }
     });
 
-    // When user presses Enter on input, add that savings
+    // Input handlers
     inputSavings.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        e.preventDefault();
         handleInputSubmit();
       }
     });
 
-    // On input blur (loses focus), try adding the amount entered
     inputSavings.addEventListener('blur', () => {
       handleInputSubmit();
     });
 
-    // On input change (typing), do not update progress bar,
-    // just allow field to be cleared/edited. Progress stays sticky.
-
-    // Initialize app states
     init();
   })();
 </script>
