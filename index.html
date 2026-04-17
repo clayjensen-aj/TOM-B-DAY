@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Savings Progress App</title>
+<style>
+  /* Dark theme base */
+  body {
+    margin: 0;
+    background-color: #121212;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 15px 40px;
+    height: 100vh;
+    box-sizing: border-box;
+  }
+
+  /* Countdown timer at top */
+  #countdown {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+
+  /* Goal text section */
+  #goal-container {
+    text-align: center;
+    margin-bottom: 22px;
+    user-select: none;
+  }
+  #goal-label {
+    font-weight: 500;
+    font-size: 1.2rem;
+    letter-spacing: 0.07em;
+    margin-bottom: 5px;
+  }
+  #goal-value {
+    font-weight: 900;
+    font-size: 3rem;
+    letter-spacing: 0.05em;
+    user-select: text;
+  }
+
+  /* Progress bar container */
+  #progress-wrapper {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+  }
+
+  /* Progress bar background */
+  #progress-bar-bg {
+    flex: 1;
+    height: 20px;
+    background-color: #2a2f42;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  /* Progress bar filled */
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4a90e2, #629fcc);
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 10px 0 0 10px;
+  }
+  /* Progress % text */
+  #progress-percent {
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 45px;
+    text-align: right;
+    user-select: none;
+  }
+
+  /* Total savings display below progress */
+  #total-savings {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 10px 0 32px;
+    user-select: text;
+    text-align: center;
+  }
+
+  /* Perfect numbers section */
+  #perfect-numbers {
+    width: 100%;
+    max-width: 400px;
+    background: #1c1f2a;
+    border-radius: 14px;
+    padding: 18px 25px;
+    margin-bottom: 35px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    user-select: none;
+  }
+
+  /* Buttons container */
+  #buttons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 360px;
+    gap: 14px 20px;
+    margin-bottom: 45px;
+  }
+
+  /* Each increment button */
+  .btn-increment {
+    min-width: 70px;
+    background-color: #2a2f42;
+    border: none;
+    border-radius: 18px;
+    padding: 13px 0;
+    color: #e5e5e5;
+    font-size: 1.3rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(74,144,226,0.45);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .btn-increment:active {
+    background-color: #3b4362;
+  }
+
+  /* Input field container */
+  #input-container {
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+  }
+
+  /* Input field styling */
+  #input-savings {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #629fcc;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #76aaff;
+    outline: none;
+    padding: 6px 12px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    caret-color: #76aaff;
+    letter-spacing: 0.07em;
+  }
+  #input-savings::placeholder {
+    color: #76aaffa0;
+    font-weight: 500;
+  }
+
+  /* Responsive text scaling for smaller screens */
+  @media (max-width: 320px) {
+    #goal-value {
+      font-size: 2.3rem;
+    }
+    .btn-increment {
+      min-width: 55px;
+      font-size: 1.1rem;
+      padding: 10px 0;
+    }
+    #perfect-numbers {
+      font-size: 1.3rem;
+      padding: 15px 18px;
+      gap: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="countdown">Days remaining till 3 Sep: ... days</div>
+
+<div id="goal-container" aria-label="Savings Goal">
+  <div id="goal-label">GOAL</div>
+  <div id="goal-value">0 - 2000</div>
+</div>
+
+<div id="progress-wrapper" aria-label="Savings Progress">
+  <div id="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="progress-percent">0%</div>
+</div>
+
+<div id="total-savings" aria-live="polite" aria-atomic="true" aria-relevant="text">Total Savings: 0</div>
+
+<div id="perfect-numbers" aria-label="Perfect Numbers">6877 1010 2020 3033</div>
+
+<div id="buttons-container" aria-label="Add Savings Amount Buttons">
+  <button class="btn-increment" data-val="5">5</button>
+  <button class="btn-increment" data-val="10">10</button>
+  <button class="btn-increment" data-val="20">20</button>
+  <button class="btn-increment" data-val="50">50</button>
+  <button class="btn-increment" data-val="100">100</button>
+</div>
+
+<div id="input-container">
+  <input
+    type="number"
+    id="input-savings"
+    placeholder="enter savings"
+    aria-label="Enter savings amount"
+    min="0"
+    step="1"
+  />
+</div>
+
+<script>
+  (function() {
+    const goalMax = 2000;
+    const goalMin = 0; // design shows 0 - 2000 range
+    // Initialize saved total
+    let totalSavings = 0;
+
+    // Highest progress percent reached (sticky progress)
+    let highestPercent = 0;
+
+    // Elements references
+    const countdownEl = document.getElementById('countdown');
+    const goalValueEl = document.getElementById('goal-value');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercentEl = document.getElementById('progress-percent');
+    const totalSavingsEl = document.getElementById('total-savings');
+    const perfectNumbersEl = document.getElementById('perfect-numbers');
+    const buttonsContainer = document.getElementById('buttons-container');
+    const inputSavings = document.getElementById('input-savings');
+
+    // Display the countdown days till Sep 3, 2026
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date(2026, 8, 3); // Months are 0-based: 8 = Sept
+      const diffMs = target - now;
+      const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+      countdownEl.textContent = `Days remaining till 3 Sep: ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+    }
+
+    // Update the goal text "0 - 2000"
+    function updateGoalText() {
+      goalValueEl.textContent = `${totalSavings} - ${goalMax}`;
+    }
+
+    // Update progress bar and percentage with sticky progress logic
+    function updateProgress() {
+      const percent = Math.min(100, Math.floor((totalSavings / goalMax) * 100));
+      // Only update if this progress is greater than previous highest
+      if (percent > highestPercent) {
+        highestPercent = percent;
+      }
+      progressBar.style.width = highestPercent + '%';
+      progressPercentEl.textContent = highestPercent + '%';
+      // Update ARIA progressbar value
+      const progressBarBg = document.getElementById('progress-bar-bg');
+      progressBarBg.setAttribute('aria-valuenow', highestPercent);
+    }
+
+    // Update total savings displayed
+    function updateTotalSavings() {
+      totalSavingsEl.textContent = `Total Savings: ${totalSavings}`;
+    }
+
+    // Generate or update the Perfect Numbers based on progress
+    // Let's make them change as the percentage moves: a limited example (cycling numbers)
+    // We'll produce 4 numbers that change dynamically based on highestPercent
+    function updatePerfectNumbers() {
+      // Example logic: create 4 numbers changing with progress.
+      // For "reacting" effect, use mod and some transformations.
+      // Numbers will be between 6000 to 7000 approx (like original 6877)
+      const base = 6000;
+      const change = Math.floor(highestPercent * 10);
+
+      // We'll create 4 numbers varying differently
+      const num1 = 6000 + (change * 1) % 1000;
+      const num2 = 6100 + (change * 2) % 900;
+      const num3 = 6200 + (change * 3) % 800;
+      const num4 = 6300 + (change * 4) % 700;
+
+      const perfectStr = `${num1} ${num2} ${num3} ${num4}`;
+      perfectNumbersEl.textContent = perfectStr;
+    }
+
+    // Handle adding a new saving amount
+    function addSavings(amount) {
+      if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) return;
+      // Add to total savings
+      totalSavings += amount;
+      if (totalSavings > goalMax) totalSavings = goalMax;
+
+      // Update all relevant UI parts
+      updateGoalText();
+      updateProgress();
+      updateTotalSavings();
+      updatePerfectNumbers();
+      // Clear the input field after entering new total
+      inputSavings.value = '';
+    }
+
+    // Handle manual input on Enter key or on losing focus
+    function handleInputSubmit() {
+      const val = Number(inputSavings.value);
+      if (!isNaN(val) && val > 0) {
+        addSavings(val);
+      }
+    }
+
+    // Sticky progress logic: When typing in empty or smaller value,
+    // progress remains at highestPercent until new total is submitted.
+
+    // Initialize UI at first run
+    function init() {
+      updateCountdown();
+      updateGoalText();
+      updateProgress();
+      updateTotalSavings();
+      updatePerfectNumbers();
+    }
+
+    // Timer to update countdown daily (refresh every minute for demo)
+    setInterval(updateCountdown, 60000);
+    updateCountdown();
+
+    // Event listeners
+    buttonsContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn-increment')) {
+        const val = Number(e.target.getAttribute('data-val'));
+        addSavings(val);
+      }
+    });
+
+    // When user presses Enter on input, add that savings
+    inputSavings.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        handleInputSubmit();
+      }
+    });
+
+    // On input blur (loses focus), try adding the amount entered
+    inputSavings.addEventListener('blur', () => {
+      handleInputSubmit();
+    });
+
+    // On input change (typing), do not update progress bar,
+    // just allow field to be cleared/edited. Progress stays sticky.
+
+    // Initialize app states
+    init();
+  })();
+</script>
+
+</body>
+</html>
