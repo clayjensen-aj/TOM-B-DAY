@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Savings Progress App with Share Button</title>
+<title>Savings Progress App - Final Version</title>
 <style>
   /* Dark theme base */
   body {
@@ -15,7 +15,7 @@
     flex-direction: column;
     align-items: center;
     padding: 20px 15px 40px;
-    height: 100vh;
+    min-height: 100vh;
     box-sizing: border-box;
   }
 
@@ -27,40 +27,26 @@
     background: linear-gradient(135deg, #4a90e2, #629fcc);
     border: none;
     border-radius: 50%;
-    width: 56px;
-    height: 56px;
+    width: 50px;
+    height: 50px;
     color: #fff;
-    font-size: 1.4rem;
-    font-weight: 700;
-    box-shadow: 
-      0 8px 24px rgba(74, 144, 226, 0.4),
-      0 0 0 1px rgba(74, 144, 226, 0.3);
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
     cursor: pointer;
-    user-select: none;
-    transition: all 0.3s ease;
     z-index: 999;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  #share-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 
-      0 12px 32px rgba(74, 144, 226, 0.5),
-      0 0 0 1px rgba(74, 144, 226, 0.4);
-  }
-  #share-btn:active {
-    transform: scale(0.98);
-  }
 
-  /* Countdown timer at top */
+  /* Countdown timer */
   #countdown {
     font-weight: 600;
     font-size: 1.1rem;
     margin-top: 10px;
     margin-bottom: 30px;
-    letter-spacing: 0.03em;
     text-align: center;
+    color: #76aaff;
   }
 
   /* Success Popup */
@@ -68,25 +54,19 @@
     position: fixed;
     top: 80px;
     left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #2a2f42, #1e2338);
+    transform: translateX(-50%) translateY(-20px);
+    background: #1e2338;
     color: #fff;
-    padding: 16px 24px;
-    border-radius: 20px;
+    padding: 12px 20px;
+    border-radius: 12px;
     font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 
-      0 12px 32px rgba(74, 144, 226, 0.4),
-      0 0 0 1px rgba(74, 144, 226, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     opacity: 0;
     visibility: hidden;
-    transform: translateX(-50%) translateY(-20px);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.4s ease;
     z-index: 1000;
-    max-width: 90vw;
     text-align: center;
-    letter-spacing: 0.02em;
+    border: 1px solid #4a90e2;
   }
   #success-popup.show {
     opacity: 1;
@@ -94,164 +74,77 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* Goal text section */
-  #goal-container {
-    text-align: center;
-    margin-bottom: 22px;
-    user-select: none;
+  /* Victory Gift Overlay */
+  #victory-gift {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 10rem;
+    z-index: 2000;
+    display: none;
+    text-shadow: 0 0 30px #ffd700;
+    pointer-events: none;
   }
-  #goal-label {
-    font-weight: 500;
-    font-size: 1.2rem;
-    letter-spacing: 0.07em;
-    margin-bottom: 5px;
-  }
-  #goal-value {
-    font-weight: 900;
-    font-size: 3rem;
-    letter-spacing: 0.05em;
-    user-select: text;
-  }
-
-  /* Progress bar container */
-  #progress-wrapper {
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 12px;
+  @keyframes giftVictory {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
 
-  /* Progress bar background */
-  #progress-bar-bg {
-    flex: 1;
-    height: 20px;
-    background-color: #2a2f42;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  /* Progress bar filled */
-  #progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #4a90e2, #629fcc);
-    width: 0%;
-    transition: width 0.4s ease;
-    border-radius: 10px 0 0 10px;
-  }
-  /* Progress % text */
-  #progress-percent {
-    font-weight: 700;
-    font-size: 1rem;
-    min-width: 45px;
-    text-align: right;
-    user-select: none;
-  }
+  /* Goal text */
+  #goal-container { text-align: center; margin-bottom: 22px; }
+  #goal-label { font-weight: 500; font-size: 1.2rem; color: #a0a0a0; margin-bottom: 5px; }
+  #goal-value { font-weight: 900; font-size: 3rem; letter-spacing: 0.05em; }
 
-  /* Total savings display below progress */
-  #total-savings {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin: 10px 0 32px;
-    user-select: text;
-    text-align: center;
-  }
+  /* Progress Bar */
+  #progress-wrapper { width: 100%; max-width: 400px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+  #progress-bar-bg { flex: 1; height: 20px; background-color: #2a2f42; border-radius: 10px; overflow: hidden; }
+  #progress-bar { height: 100%; width: 0%; transition: width 0.5s ease, background 0.5s ease; border-radius: 10px 0 0 10px; }
+  
+  /* Milestone Colors */
+  .default { background: linear-gradient(90deg, #4a90e2, #629fcc); }
+  .bronze { background: linear-gradient(90deg, #cd7f32, #d4a757); box-shadow: 0 0 12px rgba(205, 127, 50, 0.6); }
+  .silver { background: linear-gradient(90deg, #c0c0c0, #e5e5e5); box-shadow: 0 0 16px rgba(192, 192, 192, 0.7); }
+  .gold { background: linear-gradient(90deg, #ffd700, #ffed4e); box-shadow: 0 0 24px rgba(255, 215, 0, 0.9); }
 
-  /* Buttons container */
-  #buttons-container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 360px;
-    gap: 14px 20px;
-    margin-bottom: 45px;
-  }
+  #progress-percent { font-weight: 700; font-size: 1rem; min-width: 45px; text-align: right; }
 
-  /* Each increment button */
-  .btn-increment {
-    min-width: 70px;
-    background-color: #2a2f42;
-    border: none;
-    border-radius: 18px;
-    padding: 13px 0;
-    color: #e5e5e5;
-    font-size: 1.3rem;
-    font-weight: 600;
-    box-shadow: 0 4px 6px rgba(74,144,226,0.45);
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s ease;
-  }
-  .btn-increment:active {
-    background-color: #3b4362;
-  }
+  /* Savings Info */
+  #total-savings { font-size: 1.4rem; font-weight: 700; margin: 10px 0 10px; text-align: center; }
+  #last-entry { font-size: 0.85rem; color: #a0a0a0; font-weight: 500; margin-bottom: 32px; text-align: center; }
 
-  /* Input field container */
-  #input-container {
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-  }
+  /* Buttons */
+  #buttons-container { display: flex; justify-content: center; flex-wrap: wrap; max-width: 360px; gap: 14px 20px; margin-bottom: 45px; }
+  .btn-increment { min-width: 70px; background-color: #2a2f42; border: none; border-radius: 18px; padding: 13px 0; color: #e5e5e5; font-size: 1.3rem; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+  .btn-increment:active { transform: scale(0.95); background-color: #3b4362; }
 
-  /* Input field styling */
-  #input-savings {
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid #629fcc;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #76aaff;
-    outline: none;
-    padding: 6px 12px;
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-    caret-color: #76aaff;
-    letter-spacing: 0.07em;
-  }
-  #input-savings::placeholder {
-    color: #76aaffa0;
-    font-weight: 500;
-  }
-
-  /* Responsive text scaling for smaller screens */
-  @media (max-width: 320px) {
-    #goal-value {
-      font-size: 2.3rem;
-    }
-    .btn-increment {
-      min-width: 55px;
-      font-size: 1.1rem;
-      padding: 10px 0;
-    }
-  }
+  /* Input */
+  #input-container { width: 100%; max-width: 380px; text-align: center; }
+  #input-savings { background: transparent; border: none; border-bottom: 2px solid #629fcc; font-size: 1.25rem; font-weight: 600; color: #76aaff; outline: none; padding: 6px 12px; width: 100%; text-align: center; }
 </style>
 </head>
 <body>
 
-<!-- Share Button - Fixed top-right -->
-<button id="share-btn" aria-label="Share Progress" title="Share Progress">📤</button>
-
-<div id="countdown">Days remaining till 3 Sep: ... days</div>
-
-<!-- Success Popup -->
+<button id="share-btn">📤</button>
+<div id="countdown">Goal Deadline: 14 Aug</div>
 <div id="success-popup"></div>
+<div id="victory-gift">🎁</div>
 
-<div id="goal-container" aria-label="Savings Goal">
+<div id="goal-container">
   <div id="goal-label">GOAL</div>
   <div id="goal-value">0 - 2000</div>
 </div>
 
-<div id="progress-wrapper" aria-label="Savings Progress">
-  <div id="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <div id="progress-bar"></div>
-  </div>
+<div id="progress-wrapper">
+  <div id="progress-bar-bg"><div id="progress-bar" class="default"></div></div>
   <div id="progress-percent">0%</div>
 </div>
 
-<div id="total-savings" aria-live="polite" aria-atomic="true" aria-relevant="text">Total Savings: 0</div>
+<div id="total-savings">Total Savings: 0</div>
+<div id="last-entry">Last added: ₹0 on Never</div>
 
-<div id="buttons-container" aria-label="Add Savings Amount Buttons">
+<div id="buttons-container">
   <button class="btn-increment" data-val="5">5</button>
   <button class="btn-increment" data-val="10">10</button>
   <button class="btn-increment" data-val="20">20</button>
@@ -260,44 +153,31 @@
 </div>
 
 <div id="input-container">
-  <input
-    type="number"
-    id="input-savings"
-    placeholder="enter savings"
-    aria-label="Enter savings amount"
-    min="0"
-    step="1"
-  />
+  <input type="number" id="input-savings" placeholder="enter savings" />
 </div>
 
 <script>
   (function() {
     const goalMax = 2000;
-    const goalMin = 0;
+    const targetDate = new Date(2026, 7, 14); // Aug 14
 
-    // Retrieve saved from localStorage or default 0
     let totalSavings = 0;
     let highestPercent = 0;
+    let lastAmount = 0;
+    let lastDate = 'Never';
 
-    // Elements references
     const countdownEl = document.getElementById('countdown');
     const goalValueEl = document.getElementById('goal-value');
     const progressBar = document.getElementById('progress-bar');
     const progressPercentEl = document.getElementById('progress-percent');
     const totalSavingsEl = document.getElementById('total-savings');
-    const buttonsContainer = document.getElementById('buttons-container');
+    const lastEntryEl = document.getElementById('last-entry');
     const inputSavings = document.getElementById('input-savings');
-    const progressBarBg = document.getElementById('progress-bar-bg');
     const successPopup = document.getElementById('success-popup');
-    const shareBtn = document.getElementById('share-btn');
+    const victoryGift = document.getElementById('victory-gift');
 
-    // Storage keys
-    const STORAGE_TOTAL_KEY = 'savings-total';
-    const STORAGE_HIGHEST_PERCENT_KEY = 'savings-highest-percent';
-
-    // Success messages - Emotional & Birthday + Milestone
     const successMessages = [
-      "Great job! 🎁",
+     "Great job! 🎁",
       "You're accelerating towards your goal! 🚀",
       "Keep it up! ✨",
       "₹5 closer to your dream! 💰",
@@ -314,176 +194,102 @@
       "Every bit counts when it's for a surprise this big! 💰"
     ];
 
-    // Load saved data
     function loadFromStorage() {
-      const savedTotal = localStorage.getItem(STORAGE_TOTAL_KEY);
-      const savedPercent = localStorage.getItem(STORAGE_HIGHEST_PERCENT_KEY);
-      totalSavings = savedTotal !== null ? Math.min(goalMax, Number(savedTotal)) : 0;
-      highestPercent = savedPercent !== null ? Number(savedPercent) : 0;
+      totalSavings = Number(localStorage.getItem('savings-total')) || 0;
+      highestPercent = Number(localStorage.getItem('savings-highest-percent')) || 0;
+      lastAmount = Number(localStorage.getItem('savings-last-amount')) || 0;
+      lastDate = localStorage.getItem('savings-last-date') || 'Never';
     }
 
-    // Save data to localStorage
     function saveToStorage() {
-      localStorage.setItem(STORAGE_TOTAL_KEY, totalSavings);
-      localStorage.setItem(STORAGE_HIGHEST_PERCENT_KEY, highestPercent);
+      localStorage.setItem('savings-total', totalSavings);
+      localStorage.setItem('savings-highest-percent', highestPercent);
+      localStorage.setItem('savings-last-amount', lastAmount);
+      localStorage.setItem('savings-last-date', lastDate);
     }
 
-    // Share progress function using Web Share API
-    async function shareProgress() {
-      const inputAmount = Number(inputSavings.value) || 0;
-      const daysLeft = countdownEl.textContent.match(/(\d+) day/)[1] || '0';
-      
-      const shareText = `I saved ₹${inputAmount} today for the big surprise! Total: ₹${totalSavings} / ₹2000. Progress: ${highestPercent}%. ${daysLeft} days left! 🎁`;
-      
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'My Savings Progress 🎁',
-            text: shareText,
-            url: window.location.href
-          });
-        } catch (error) {
-          // Fallback to copy to clipboard
-          await navigator.clipboard.writeText(shareText);
-          showSuccessPopup('Progress copied to clipboard!');
-        }
-      } else {
-        // Fallback for browsers without Web Share API
-        await navigator.clipboard.writeText(shareText);
-        showSuccessPopup('Progress copied to clipboard!');
-      }
-    }
-
-    // Show success popup with random message
-    function showSuccessPopup(messageOverride = null) {
-      // Pick random message or use override
-      let message;
-      if (messageOverride) {
-        message = messageOverride;
-      } else {
-        const randomIndex = Math.floor(Math.random() * successMessages.length);
-        message = successMessages[randomIndex];
-      }
-      
-      successPopup.textContent = message;
-      
-      // Show popup with animation
-      successPopup.classList.add('show');
-      
-      // Auto-hide after 2 seconds
-      setTimeout(() => {
-        successPopup.classList.remove('show');
-      }, 2000);
-    }
-
-    // Display the countdown days till Sep 3, 2026
-    function updateCountdown() {
-      const now = new Date();
-      const target = new Date(2026, 8, 3); // Months are 0-based: 8 = Sept
-      const diffMs = target - now;
-      const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-      countdownEl.textContent = `Days remaining till 3 Sep: ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
-    }
-
-    // Update the goal text "X - 2000"
-    function updateGoalText() {
+    function updateUI() {
+      // Top header and savings text
       goalValueEl.textContent = `${totalSavings} - ${goalMax}`;
-    }
+      totalSavingsEl.textContent = `Total Savings: ${totalSavings}`;
+      lastEntryEl.textContent = `Last added: ₹${lastAmount} on ${lastDate}`;
 
-    // Update progress bar and percentage with sticky progress logic
-    function updateProgress() {
-      const percent = Math.min(100, Math.floor((totalSavings / goalMax) * 100));
-      if (percent > highestPercent) {
-        highestPercent = percent;
+      // Progress Logic
+      const currentPercent = Math.min(100, Math.floor((totalSavings / goalMax) * 100));
+      if (currentPercent > highestPercent) {
+        highestPercent = currentPercent;
       }
+      
       progressBar.style.width = highestPercent + '%';
       progressPercentEl.textContent = highestPercent + '%';
-      // Update ARIA progressbar value
-      progressBarBg.setAttribute('aria-valuenow', highestPercent);
+
+      // Milestone Colors
+      progressBar.className = ''; 
+      if (highestPercent >= 100) {
+        progressBar.classList.add('gold');
+        victoryGift.style.display = 'block';
+        victoryGift.style.animation = 'giftVictory 2s forwards';
+      } else if (highestPercent >= 50) {
+        progressBar.classList.add('silver');
+      } else if (highestPercent >= 25) {
+        progressBar.classList.add('bronze');
+      } else {
+        progressBar.classList.add('default');
+      }
+
+      // Countdown
+      const now = new Date();
+      const diffMs = targetDate - now;
+      const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+      countdownEl.textContent = `Goal Deadline: 14 Aug (${diffDays} days left)`;
     }
 
-    // Update total savings displayed
-    function updateTotalSavings() {
-      totalSavingsEl.textContent = `Total Savings: ${totalSavings}`;
-    }
-
-    // Handle adding new saving amount (increment/add)
     function addSavings(amount) {
-      if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) return;
-      totalSavings += amount;
-      if (totalSavings > goalMax) totalSavings = goalMax;
+      if (isNaN(amount) || amount <= 0) return;
       
-      updateGoalText();
-      updateProgress();
-      updateTotalSavings();
+      lastAmount = amount;
+      const d = new Date();
+      lastDate = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      
+      totalSavings = Math.min(goalMax, totalSavings + amount);
       
       saveToStorage();
+      updateUI();
       
-      // Show success popup with amount
-      showSuccessPopup();
-      
-      inputSavings.value = '';
+      // Random Popup
+      const msg = successMessages[Math.floor(Math.random() * successMessages.length)];
+      successPopup.textContent = msg;
+      successPopup.classList.add('show');
+      setTimeout(() => successPopup.classList.remove('show'), 2000);
     }
 
-    // Handle manual input submission on Enter or blur
-    function handleInputSubmit() {
-      const val = Number(inputSavings.value);
-      if (!isNaN(val) && val > 0) {
-        totalSavings += val;
-        if (totalSavings > goalMax) totalSavings = goalMax;
-        
-        updateGoalText();
-        updateProgress();
-        updateTotalSavings();
-        
-        saveToStorage();
-        
-        // Show success popup with entered amount
-        showSuccessPopup();
-        
+    document.getElementById('buttons-container').onclick = (e) => {
+      if (e.target.classList.contains('btn-increment')) {
+        addSavings(Number(e.target.dataset.val));
+      }
+    };
+
+    inputSavings.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        addSavings(Number(inputSavings.value));
         inputSavings.value = '';
       }
-    }
+    };
 
-    // Initialize UI with loaded or default values
-    function init() {
-      loadFromStorage();
-      updateCountdown();
-      updateGoalText();
-      updateProgress();
-      updateTotalSavings();
-      saveToStorage(); // Ensure initial load is saved
-    }
+    document.getElementById('share-btn').onclick = () => {
+        const shareText = `Progress Update: ₹${totalSavings}/₹${goalMax} saved for the big surprise! (${highestPercent}%). Gift loading for 14 Aug! 🎁`;
+        if (navigator.share) {
+            navigator.share({ text: shareText });
+        } else {
+            navigator.clipboard.writeText(shareText);
+            alert("Progress copied to clipboard! Paste it in your DMs.");
+        }
+    };
 
-    setInterval(updateCountdown, 60000);
-    updateCountdown();
-
-    // Share button handler
-    shareBtn.addEventListener('click', shareProgress);
-
-    // Buttons handlers
-    buttonsContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('btn-increment')) {
-        const val = Number(e.target.getAttribute('data-val'));
-        addSavings(val);
-      }
-    });
-
-    // Input handlers
-    inputSavings.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleInputSubmit();
-      }
-    });
-
-    inputSavings.addEventListener('blur', () => {
-      handleInputSubmit();
-    });
-
-    init();
+    // Start App
+    loadFromStorage();
+    updateUI();
   })();
 </script>
-
 </body>
 </html>
