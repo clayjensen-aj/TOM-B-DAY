@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -202,6 +202,7 @@
 
 <div id="total-savings" aria-live="polite" aria-atomic="true" aria-relevant="text">Total Savings: 0</div>
 
+<div id="perfect-numbers" aria-label="Perfect Numbers">6877 1010 2020 3033</div>
 
 <div id="buttons-container" aria-label="Add Savings Amount Buttons">
   <button class="btn-increment" data-val="5">5</button>
@@ -225,7 +226,7 @@
 <script>
   (function() {
     const goalMax = 2000;
-    const goalMin = 0; // design shows 0 - 2000 range
+    const goalMin = 0;
 
     // Retrieve saved from localStorage or default 0
     let totalSavings = 0;
@@ -291,17 +292,16 @@
       totalSavingsEl.textContent = `Total Savings: ${totalSavings}`;
     }
 
-   
-
     // Handle adding new saving amount (increment/add)
     function addSavings(amount) {
       if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) return;
       totalSavings += amount;
       if (totalSavings > goalMax) totalSavings = goalMax;
+      
       updateGoalText();
       updateProgress();
       updateTotalSavings();
-      updatePerfectNumbers();
+      
       saveToStorage();
       inputSavings.value = '';
     }
@@ -312,10 +312,11 @@
       if (!isNaN(val) && val > 0) {
         totalSavings += val;
         if (totalSavings > goalMax) totalSavings = goalMax;
+        
         updateGoalText();
         updateProgress();
         updateTotalSavings();
-        updatePerfectNumbers();
+        
         saveToStorage();
         inputSavings.value = '';
       }
@@ -328,7 +329,7 @@
       updateGoalText();
       updateProgress();
       updateTotalSavings();
-      updatePerfectNumbers();
+      saveToStorage(); // Ensure initial load is saved
     }
 
     setInterval(updateCountdown, 60000);
