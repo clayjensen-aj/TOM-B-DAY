@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Savings Progress App with Success Popup</title>
+<title>Savings Progress App with Share Button</title>
 <style>
   /* Dark theme base */
   body {
@@ -17,6 +17,40 @@
     padding: 20px 15px 40px;
     height: 100vh;
     box-sizing: border-box;
+  }
+
+  /* Share Button - Fixed top-right */
+  #share-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4a90e2, #629fcc);
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    box-shadow: 
+      0 8px 24px rgba(74, 144, 226, 0.4),
+      0 0 0 1px rgba(74, 144, 226, 0.3);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #share-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 12px 32px rgba(74, 144, 226, 0.5),
+      0 0 0 1px rgba(74, 144, 226, 0.4);
+  }
+  #share-btn:active {
+    transform: scale(0.98);
   }
 
   /* Countdown timer at top */
@@ -195,6 +229,9 @@
 </head>
 <body>
 
+<!-- Share Button - Fixed top-right -->
+<button id="share-btn" aria-label="Share Progress" title="Share Progress">📤</button>
+
 <div id="countdown">Days remaining till 3 Sep: ... days</div>
 
 <!-- Success Popup -->
@@ -252,6 +289,7 @@
     const inputSavings = document.getElementById('input-savings');
     const progressBarBg = document.getElementById('progress-bar-bg');
     const successPopup = document.getElementById('success-popup');
+    const shareBtn = document.getElementById('share-btn');
 
     // Storage keys
     const STORAGE_TOTAL_KEY = 'savings-total';
@@ -290,15 +328,41 @@
       localStorage.setItem(STORAGE_HIGHEST_PERCENT_KEY, highestPercent);
     }
 
-    // Show success popup with random message
-    function showSuccessPopup(amount = null) {
-      // Pick random message
-      const randomIndex = Math.floor(Math.random() * successMessages.length);
-      let message = successMessages[randomIndex];
+    // Share progress function using Web Share API
+    async function shareProgress() {
+      const inputAmount = Number(inputSavings.value) || 0;
+      const daysLeft = countdownEl.textContent.match(/(\d+) day/)[1] || '0';
       
-      // Replace [Amount] placeholder if amount provided
-      if (amount) {
-        message = message.replace('₹[Amount]', `₹${amount}`);
+      const shareText = `I saved ₹${inputAmount} today for the big surprise! Total: ₹${totalSavings} / ₹2000. Progress: ${highestPercent}%. ${daysLeft} days left! 🎁`;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'My Savings Progress 🎁',
+            text: shareText,
+            url: window.location.href
+          });
+        } catch (error) {
+          // Fallback to copy to clipboard
+          await navigator.clipboard.writeText(shareText);
+          showSuccessPopup('Progress copied to clipboard!');
+        }
+      } else {
+        // Fallback for browsers without Web Share API
+        await navigator.clipboard.writeText(shareText);
+        showSuccessPopup('Progress copied to clipboard!');
+      }
+    }
+
+    // Show success popup with random message
+    function showSuccessPopup(messageOverride = null) {
+      // Pick random message or use override
+      let message;
+      if (messageOverride) {
+        message = messageOverride;
+      } else {
+        const randomIndex = Math.floor(Math.random() * successMessages.length);
+        message = successMessages[randomIndex];
       }
       
       successPopup.textContent = message;
@@ -356,7 +420,7 @@
       saveToStorage();
       
       // Show success popup with amount
-      showSuccessPopup(amount);
+      showSuccessPopup();
       
       inputSavings.value = '';
     }
@@ -375,7 +439,7 @@
         saveToStorage();
         
         // Show success popup with entered amount
-        showSuccessPopup(val);
+        showSuccessPopup();
         
         inputSavings.value = '';
       }
@@ -393,6 +457,9 @@
 
     setInterval(updateCountdown, 60000);
     updateCountdown();
+
+    // Share button handler
+    shareBtn.addEventListener('click', shareProgress);
 
     // Buttons handlers
     buttonsContainer.addEventListener('click', (e) => {
