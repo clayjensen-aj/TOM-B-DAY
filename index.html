@@ -1,9 +1,9 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Savings Progress App with Persistence</title>
+<title>Savings Progress App with Success Popup</title>
 <style>
   /* Dark theme base */
   body {
@@ -27,6 +27,37 @@
     margin-bottom: 30px;
     letter-spacing: 0.03em;
     text-align: center;
+  }
+
+  /* Success Popup */
+  #success-popup {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #2a2f42, #1e2338);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 
+      0 12px 32px rgba(74, 144, 226, 0.4),
+      0 0 0 1px rgba(74, 144, 226, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-20px);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 1000;
+    max-width: 90vw;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  #success-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
   }
 
   /* Goal text section */
@@ -90,23 +121,6 @@
     margin: 10px 0 32px;
     user-select: text;
     text-align: center;
-  }
-
-  /* Perfect numbers section */
-  #perfect-numbers {
-    width: 100%;
-    max-width: 400px;
-    background: #1c1f2a;
-    border-radius: 14px;
-    padding: 18px 25px;
-    margin-bottom: 35px;
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: 0.04em;
-    user-select: none;
   }
 
   /* Buttons container */
@@ -176,17 +190,15 @@
       font-size: 1.1rem;
       padding: 10px 0;
     }
-    #perfect-numbers {
-      font-size: 1.3rem;
-      padding: 15px 18px;
-      gap: 10px;
-    }
   }
 </style>
 </head>
 <body>
 
 <div id="countdown">Days remaining till 3 Sep: ... days</div>
+
+<!-- Success Popup -->
+<div id="success-popup"></div>
 
 <div id="goal-container" aria-label="Savings Goal">
   <div id="goal-label">GOAL</div>
@@ -201,8 +213,6 @@
 </div>
 
 <div id="total-savings" aria-live="polite" aria-atomic="true" aria-relevant="text">Total Savings: 0</div>
-
-<div id="perfect-numbers" aria-label="Perfect Numbers">6877 1010 2020 3033</div>
 
 <div id="buttons-container" aria-label="Add Savings Amount Buttons">
   <button class="btn-increment" data-val="5">5</button>
@@ -238,14 +248,33 @@
     const progressBar = document.getElementById('progress-bar');
     const progressPercentEl = document.getElementById('progress-percent');
     const totalSavingsEl = document.getElementById('total-savings');
-    const perfectNumbersEl = document.getElementById('perfect-numbers');
     const buttonsContainer = document.getElementById('buttons-container');
     const inputSavings = document.getElementById('input-savings');
     const progressBarBg = document.getElementById('progress-bar-bg');
+    const successPopup = document.getElementById('success-popup');
 
     // Storage keys
     const STORAGE_TOTAL_KEY = 'savings-total';
     const STORAGE_HIGHEST_PERCENT_KEY = 'savings-highest-percent';
+
+    // Success messages - Emotional & Birthday + Milestone
+    const successMessages = [
+      "Great job! 🎁",
+      "You're accelerating towards your goal! 🚀",
+      "Keep it up! ✨",
+      "₹5 closer to your dream! 💰",
+      "Imagine the look on their face when they open this! 🎁",
+      "Every rupee is a part of the best surprise ever. ✨",
+      "You're not just saving money; you're saving a memory! 🎈",
+      "Almost there! They are going to be so shocked. 😍",
+      "The best gifts aren't bought, they are earned with effort like this. 💪",
+      "Picture their happy face! That's what this is for. 😊",
+      "A special person deserves a special gift. Keep going! 🎂",
+      "₹[Amount] closer to making their birthday perfect! 🚀",
+      "You just accelerated! The countdown is on. ⏳",
+      "Goal: ₹2000. Current status: Unstoppable Friend! 🔥",
+      "Every bit counts when it's for a surprise this big! 💰"
+    ];
 
     // Load saved data
     function loadFromStorage() {
@@ -259,6 +288,28 @@
     function saveToStorage() {
       localStorage.setItem(STORAGE_TOTAL_KEY, totalSavings);
       localStorage.setItem(STORAGE_HIGHEST_PERCENT_KEY, highestPercent);
+    }
+
+    // Show success popup with random message
+    function showSuccessPopup(amount = null) {
+      // Pick random message
+      const randomIndex = Math.floor(Math.random() * successMessages.length);
+      let message = successMessages[randomIndex];
+      
+      // Replace [Amount] placeholder if amount provided
+      if (amount) {
+        message = message.replace('₹[Amount]', `₹${amount}`);
+      }
+      
+      successPopup.textContent = message;
+      
+      // Show popup with animation
+      successPopup.classList.add('show');
+      
+      // Auto-hide after 2 seconds
+      setTimeout(() => {
+        successPopup.classList.remove('show');
+      }, 2000);
     }
 
     // Display the countdown days till Sep 3, 2026
@@ -303,6 +354,10 @@
       updateTotalSavings();
       
       saveToStorage();
+      
+      // Show success popup with amount
+      showSuccessPopup(amount);
+      
       inputSavings.value = '';
     }
 
@@ -318,6 +373,10 @@
         updateTotalSavings();
         
         saveToStorage();
+        
+        // Show success popup with entered amount
+        showSuccessPopup(val);
+        
         inputSavings.value = '';
       }
     }
